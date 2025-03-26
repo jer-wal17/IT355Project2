@@ -5,11 +5,13 @@ public class App {
         Scanner in = new Scanner(System.in);
         boolean keepPlaying = true;
         while(keepPlaying) {
+            // create and shuffle deck
             Deck deck = DeckBuilder.createStandardDeck();
             deck.shuffle();
+
+            // create hands and draw cards for them
             Hand playerHand = new Hand();
             Hand dealerHand = new Hand();
-
             for(int i = 0; i < 2; i++) {
                 dealerHand.insertCard(deck.drawCard());
             }
@@ -17,6 +19,7 @@ public class App {
                 playerHand.insertCard(deck.drawCard());
             }
 
+            // print hands (only show the first card of the dealer)
             System.out.println("Revealed dealer card:");
             System.out.println(dealerHand.getCardAtIndex(0).getDisplayText() + "\n");
             System.out.println("Your cards:");
@@ -25,20 +28,22 @@ public class App {
             boolean exitApp = false;
             boolean revealDealer = false;
 
+            // check if the player has blackjack
             int handValue = playerHand.getHandValue();
             if(handValue == 21) {
                 System.out.println("Blackjack! You Win!");
                 exitApp = true;
             }
-
+            
+            // game loop
             while(!(exitApp || revealDealer)) {
-                System.out.println("Type 1 to hit and 2 to hold.");
+                System.out.println("Type 1 to hit and 2 to stand.");
                 int choice = -1;
                 if (in.hasNextInt()) {
                     choice = in.nextInt();
                 }
                 switch(choice) {
-                    case 1:
+                    case 1: // hit
                         playerHand.insertCard(deck.drawCard());
                         System.out.println("Your cards:");
                         printHand(playerHand);
@@ -52,7 +57,7 @@ public class App {
                             revealDealer = true;
                         }
                         break;
-                    case 2:
+                    case 2: // stand
                         revealDealer = true;
                         System.out.println("");
                         break;
@@ -65,7 +70,7 @@ public class App {
                 System.out.println("Dealer cards:");
                 printHand(dealerHand);
                 Thread.sleep(1000);
-                while(dealerHand.getHandValue() < 17)
+                while(dealerHand.getHandValue() < 17) // stand on 17 or more
                 {
                     System.out.println("The dealer draws a card. \n");
                     Thread.sleep(1000);

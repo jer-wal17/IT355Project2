@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Hand {
@@ -28,6 +29,9 @@ public class Hand {
     public int getHandValue() {
         List<Integer> possibleValues = new ArrayList<Integer>();
         possibleValues.add(0);
+        // aces are the only cards with more than 1 possible value.
+        // loop through all aces.
+        // the possible values of a hand is equal to the number of aces it has plus 1.
         for(Card card : cards) {
             if(card.getRank() == Card.Rank.Ace) {
                 int startingSize = possibleValues.size();
@@ -37,6 +41,7 @@ public class Hand {
                 }
             }
         }
+        // loop through all cards, for all non-aces add their values
         for(Card card : cards) {
             for(int i = 0; i < possibleValues.size(); i++) {
                 if(card.getRank() != Card.Rank.Ace) {
@@ -45,13 +50,17 @@ public class Hand {
             }
         }
         int result = -1;
+        // sort possibleValues (ascending)
+        Collections.sort(possibleValues);
         for(int i = 0; i < possibleValues.size(); i++) {
             int currentValue = possibleValues.get(i);
             if(currentValue > 21 && result == -1) {
+                // we busted, return
                 result = currentValue;
                 break;
             }
             else if(currentValue < 22) {
+                // we did not bust
                 result = currentValue;
             }
         }

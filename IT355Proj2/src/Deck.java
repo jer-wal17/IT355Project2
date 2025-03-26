@@ -10,7 +10,9 @@ public class Deck {
 
     public void shuffle() {
         Random random = new Random();
-        for(int i = 0; i < 200; i++) {
+        // brute force, remove and insert cards x amount of times
+        int x = 200;
+        for(int i = 0; i < x; i++) {
             int randomInt = random.nextInt(cards.size());
             Card shuffledCard = cards.get(randomInt);
             cards.remove(randomInt);
