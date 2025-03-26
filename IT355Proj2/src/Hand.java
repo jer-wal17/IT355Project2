@@ -1,0 +1,87 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Hand {
+    private List<Card> cards;
+
+    public Hand() {
+        cards = new ArrayList<Card>();
+    }
+
+    public int getHandSize() {
+        return cards.size();
+    }
+
+    public Card getCardAtIndex(int index) {
+        if(index < cards.size()) {
+            return cards.get(index);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void insertCard(Card newCard) {
+        cards.add(newCard);
+    }
+    
+    public int getHandValue() {
+        List<Integer> possibleValues = new ArrayList<Integer>();
+        possibleValues.add(0);
+        for(Card card : cards) {
+            if(card.getRank() == Card.Rank.Ace) {
+                int startingSize = possibleValues.size();
+                for(int i = 0; i < startingSize; i++) {
+                    possibleValues.add(possibleValues.get(i) + 11);
+                    possibleValues.set(i, possibleValues.get(i) + 1);
+                }
+            }
+        }
+        for(Card card : cards) {
+            for(int i = 0; i < possibleValues.size(); i++) {
+                if(card.getRank() != Card.Rank.Ace) {
+                    possibleValues.set(i, possibleValues.get(i) + getCardValue(card));
+                }
+            }
+        }
+        int result = -1;
+        for(int i = 0; i < possibleValues.size(); i++) {
+            int currentValue = possibleValues.get(i);
+            if(currentValue > 21 && result == -1) {
+                result = currentValue;
+                break;
+            }
+            else if(currentValue < 22) {
+                result = currentValue;
+            }
+        }
+        return result;
+    }
+
+    private int getCardValue(Card card) {
+        switch(card.getRank()) {
+            case King: case Queen: case Jack: case Ten:
+                return 10;
+            case Nine:
+                return 9;
+            case Eight:
+                return 8;
+            case Seven:
+                return 7;
+            case Six:
+                return 6;
+            case Five:
+                return 5;
+            case Four:
+                return 4;
+            case Three:
+                return 3;
+            case Two:
+                return 2;
+            case Ace:
+                return 11;
+            default:
+                return 0;
+        }
+    }
+}
