@@ -5,6 +5,8 @@ public class App {
         Scanner in = new Scanner(System.in);
         boolean keepPlaying = true;
         while(keepPlaying) {
+            System.out.println("Welcome to Blackjack!\nThe dealer stands on 17.\n");
+
             // create and shuffle deck
             Deck deck = DeckBuilder.createStandardDeck();
             deck.shuffle();
@@ -87,20 +89,18 @@ public class App {
                     System.out.println("The dealer has a blackjack! You lose!");
                 }
                 else if(handValue > playerHand.getHandValue()) {
-                    System.out.println("You lose!");
+                    System.out.println("The dealer stands.\nYou lose!");
                 }
                 else if(handValue < playerHand.getHandValue()) {
-                    System.out.println("You win!");
+                    System.out.println("The dealer stands.\nYou win!");
                 }
                 else if(handValue == playerHand.getHandValue()) {
-                    System.out.println("It's a tie!");
+                    System.out.println("The dealer stands.\nIt's a tie!");
                 }
             }
             System.out.println("\nPress 0 to quit. Press anything else to continue.");
             keepPlaying = !(in.hasNextInt() && in.nextInt() == 0);
-            if(keepPlaying) {
-                System.out.println("\nStarting new game!\n");
-            }
+            System.out.println("");
         }
         in.close();
     }

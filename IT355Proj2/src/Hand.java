@@ -31,7 +31,7 @@ public class Hand {
         possibleValues.add(0);
         // aces are the only cards with more than 1 possible value.
         // loop through all aces.
-        // the possible values of a hand is equal to the number of aces it has plus 1.
+        // the size of the possible values of a hand is equal to the number of aces it has plus 1.
         for(Card card : cards) {
             if(card.getRank() == Card.Rank.Ace) {
                 int startingSize = possibleValues.size();
@@ -43,14 +43,14 @@ public class Hand {
         }
         // loop through all cards, for all non-aces add their values
         for(Card card : cards) {
-            for(int i = 0; i < possibleValues.size(); i++) {
-                if(card.getRank() != Card.Rank.Ace) {
+            if(card.getRank() != Card.Rank.Ace) {
+                for(int i = 0; i < possibleValues.size(); i++) {
                     possibleValues.set(i, possibleValues.get(i) + getCardValue(card));
                 }
             }
         }
         int result = -1;
-        // sort possibleValues (ascending)
+        // sort possible values (ascending)
         Collections.sort(possibleValues);
         for(int i = 0; i < possibleValues.size(); i++) {
             int currentValue = possibleValues.get(i);
