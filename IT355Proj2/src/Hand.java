@@ -25,6 +25,12 @@ public class Hand {
     public void insertCard(Card newCard) {
         cards.add(newCard);
     }
+
+    public void removeCard(int index) {
+        if(index < getHandSize()) {
+            cards.remove(index);
+        }
+    }
     
     public int getHandValue() {
         List<Integer> possibleValues = new ArrayList<Integer>();
