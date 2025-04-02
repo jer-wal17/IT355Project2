@@ -32,8 +32,12 @@ public class App {
 
             // check if the player has blackjack
             int handValue = playerHand.getHandValue();
+            int dealerHandValue = dealerHand.getHandValue();
             if(handValue == 21) {
                 System.out.println("Blackjack! You Win!");
+                exitApp = true;
+            }else if(dealerHandValue == 21){
+                System.out.println("The dealer has a blackjack! You lose!");
                 exitApp = true;
             }
             
