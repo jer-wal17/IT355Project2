@@ -44,6 +44,7 @@ public class App {
                 if (in.hasNextInt()) {
                     choice = in.nextInt();
                 }
+                in.nextLine();
                 switch(choice) {
                     case 1: // hit
                         playerHand.insertCard(deck.drawCard());
@@ -100,6 +101,7 @@ public class App {
             }
             System.out.println("\nPress 0 to quit. Press anything else to continue.");
             keepPlaying = !(in.hasNextInt() && in.nextInt() == 0);
+            in.nextLine();
             System.out.println("");
         }
         in.close();
