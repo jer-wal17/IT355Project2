@@ -12,20 +12,6 @@ public class Deck {
         cards = new Stack<Card>();
         random = new Random();
     }
-    /*
-    public void shuffle() {
-        Random random = new Random();
-        // brute force, remove and insert cards x amount of times
-        int x = 200;
-        for(int i = 0; i < x; i++) {
-            int randomInt = random.nextInt(cards.size());
-            Card shuffledCard = cards.get(randomInt);
-            cards.remove(randomInt);
-            randomInt = random.nextInt(cards.size());
-            cards.insertElementAt(shuffledCard, randomInt);
-        }
-    }
-    */
 
      public void shuffle() {
         if (cards.size() < 2) return;
