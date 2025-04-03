@@ -1,12 +1,28 @@
 import java.util.Scanner;
+import java.util.logging.*;
 import java.util.List;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class App {
+    private static Logger logger = Logger.getLogger(Class.class.getName());
+
     public static void main(String[] args) throws Exception {
+        // Logging set up
+        FileHandler fh = null;
+        try {
+            fh = new FileHandler("BlackjackLog.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        fh.setFormatter(new SimpleFormatter());
+        LogManager.getLogManager().reset();
+        logger.addHandler(fh);
+        logger.setLevel(Level.FINE);
+
         Scanner in = new Scanner(System.in);
         boolean keepPlaying = true;
-        while(keepPlaying) {
+        while (keepPlaying) {
             System.out.println("Welcome to Blackjack!\nThe dealer stands on 17.\n");
 
             // create and shuffle deck
@@ -17,11 +33,11 @@ public class App {
             List<Hand> playerHands = new ArrayList<Hand>();
             playerHands.add(new Hand());
             Hand dealerHand = new Hand();
-            for(int i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 dealerHand.insertCard(deck.drawCard());
             }
-            for(Hand playerHand : playerHands) {
-                for(int i = 0; i < 2; i++) {
+            for (Hand playerHand : playerHands) {
+                for (int i = 0; i < 2; i++) {
                     playerHand.insertCard(deck.drawCard());
                 }
             }
@@ -34,22 +50,25 @@ public class App {
             boolean revealDealer = false;
 
             // check if the player has blackjack
-            for(int i = 0; i < playerHands.size(); i++) {
+            for (int i = 0; i < playerHands.size(); i++) {
                 Hand playerHand = playerHands.get(i);
                 int handValue = playerHand.getHandValue();
-                if(handValue == 21) {
+                if (handValue == 21) {
                     System.out.println("Your cards:");
                     printHand(playerHand);
 
                     System.out.println("Blackjack! You Win!");
+                    logger.info("Player won");
                     exitApp = true;
-                } else if(playerHand.getCardAtIndex(0).getRank() == playerHand.getCardAtIndex(1).getRank()) {
+                } else if (playerHand.getCardAtIndex(0).getRank() == playerHand.getCardAtIndex(1).getRank()) {
                     // player can split
                     System.out.println("Your cards:");
                     printHand(playerHand);
 
-                    System.out.println("You have the opportunity to split your hand! Type 1 to split. Type anything else to ignore.");
-                    if(in.hasNextInt() && in.nextInt() == 1) {
+                    System.out.println(
+                            "You have the opportunity to split your hand! Type 1 to split. Type anything else to ignore.");
+                    if (in.hasNextInt() && in.nextInt() == 1) {
+                        logger.info("Player split");
                         Hand newHand = new Hand();
                         playerHands.add(newHand);
                         newHand.insertCard(playerHand.getCardAtIndex(1));
@@ -60,14 +79,15 @@ public class App {
                     in.nextLine();
                 }
             }
-            if(!exitApp && dealerHand.getHandValue() == 21) {
+            if (!exitApp && dealerHand.getHandValue() == 21) {
                 System.out.println("The dealer has a blackjack! You lose!");
+                logger.info("Player lost");
                 exitApp = true;
             }
-            
+
             // game loop
-            while(!(exitApp || revealDealer)) {
-                for(Hand playerHand : playerHands) {
+            while (!(exitApp || revealDealer)) {
+                for (Hand playerHand : playerHands) {
                     System.out.println("Your cards:");
                     printHand(playerHand);
 
@@ -77,22 +97,24 @@ public class App {
                         choice = in.nextInt();
                     }
                     in.nextLine();
-                    switch(choice) {
+                    switch (choice) {
                         case 1: // hit
+                            logger.fine("Player hit");
                             playerHand.insertCard(deck.drawCard());
                             System.out.println("Your cards:");
                             printHand(playerHand);
                             int handValue = playerHand.getHandValue();
-                            if(handValue > 21) {
+                            if (handValue > 21) {
+                                logger.info("Player lost");
                                 System.out.println("You busted!");
                                 exitApp = true;
-                            }
-                            else if(handValue == 21) {
+                            } else if (handValue == 21) {
                                 System.out.println("You got 21!");
                                 revealDealer = true;
                             }
                             break;
                         case 2: // stand
+                            logger.fine("Player stood");
                             revealDealer = true;
                             System.out.println("");
                             break;
@@ -102,11 +124,11 @@ public class App {
                     }
                 }
             }
-            if(revealDealer) {
+            if (revealDealer) {
                 System.out.println("Dealer cards:");
                 printHand(dealerHand);
                 Thread.sleep(1000);
-                while(dealerHand.getHandValue() < 17) // stand on 17 or more
+                while (dealerHand.getHandValue() < 17) // stand on 17 or more
                 {
                     System.out.println("The dealer draws a card. \n");
                     Thread.sleep(1000);
@@ -116,22 +138,23 @@ public class App {
                     Thread.sleep(1000);
                 }
                 int handValue = dealerHand.getHandValue();
-                if(handValue > 21) {
+                if (handValue > 21) {
                     System.out.println("The dealer busted! You win!");
-                }
-                else if(handValue == 21 && dealerHand.getHandSize() == 2) {
+                    logger.info("Player won");
+                } else if (handValue == 21 && dealerHand.getHandSize() == 2) {
                     System.out.println("The dealer has a blackjack! You lose!");
-                }
-                else {
-                    for(Hand playerHand : playerHands) {
-                        if(handValue > playerHand.getHandValue()) {
+                    logger.info("Player lost");
+                } else {
+                    for (Hand playerHand : playerHands) {
+                        if (handValue > playerHand.getHandValue()) {
                             System.out.println("The dealer stands.\nYou lose!");
-                        }
-                        else if(handValue < playerHand.getHandValue()) {
+                            logger.info("Player lost");
+                        } else if (handValue < playerHand.getHandValue()) {
                             System.out.println("The dealer stands.\nYou win!");
-                        }
-                        else if(handValue == playerHand.getHandValue()) {
+                            logger.info("Player won");
+                        } else if (handValue == playerHand.getHandValue()) {
                             System.out.println("The dealer stands.\nIt's a tie!");
+                            logger.info("Player tied");
                         }
                     }
                 }
@@ -142,10 +165,11 @@ public class App {
             System.out.println("");
         }
         in.close();
+        fh.close();
     }
 
     private static void printHand(Hand hand) {
-        for(int i = 0; i < hand.getHandSize(); i++) {
+        for (int i = 0; i < hand.getHandSize(); i++) {
             System.out.println(hand.getCardAtIndex(i).getDisplayText());
         }
         System.out.println(hand.getHandValue());
