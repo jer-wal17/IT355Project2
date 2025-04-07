@@ -24,6 +24,33 @@ public class Card {
         return suit;
     }
 
+    public int getValue() {
+        switch(rank) {
+            case King: case Queen: case Jack: case Ten:
+                return 10;
+            case Nine:
+                return 9;
+            case Eight:
+                return 8;
+            case Seven:
+                return 7;
+            case Six:
+                return 6;
+            case Five:
+                return 5;
+            case Four:
+                return 4;
+            case Three:
+                return 3;
+            case Two:
+                return 2;
+            case Ace:
+                return 11;
+            default:
+                return 0;
+        }
+    }
+
     public enum Suit {
         Hearts,
         Diamonds,

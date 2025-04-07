@@ -4,9 +4,18 @@ import java.util.List;
 
 public class Hand {
     private List<Card> cards;
+    private String identity;
+    public boolean busted = false;
+    public boolean blackjack = false;
+    public boolean standing = false;
 
-    public Hand() {
+    public Hand(String identity) {
         cards = new ArrayList<Card>();
+        this.identity = identity;
+    }
+
+    public String getIdentity() {
+        return identity;
     }
 
     public int getHandSize() {
@@ -51,7 +60,7 @@ public class Hand {
         for(Card card : cards) {
             if(card.getRank() != Card.Rank.Ace) {
                 for(int i = 0; i < possibleValues.size(); i++) {
-                    possibleValues.set(i, possibleValues.get(i) + getCardValue(card));
+                    possibleValues.set(i, possibleValues.get(i) + card.getValue());
                 }
             }
         }
@@ -71,32 +80,5 @@ public class Hand {
             }
         }
         return result;
-    }
-
-    private int getCardValue(Card card) {
-        switch(card.getRank()) {
-            case King: case Queen: case Jack: case Ten:
-                return 10;
-            case Nine:
-                return 9;
-            case Eight:
-                return 8;
-            case Seven:
-                return 7;
-            case Six:
-                return 6;
-            case Five:
-                return 5;
-            case Four:
-                return 4;
-            case Three:
-                return 3;
-            case Two:
-                return 2;
-            case Ace:
-                return 11;
-            default:
-                return 0;
-        }
     }
 }

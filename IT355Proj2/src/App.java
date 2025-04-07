@@ -29,10 +29,23 @@ public class App {
             Deck deck = DeckBuilder.createStandardDeck();
             deck.shuffle();
 
+            int playerCount = 0;
+            while(playerCount < 1 || playerCount > 10) {
+                System.out.println("Enter the number of players (1-10):");
+                if (in.hasNextInt()) {
+                    playerCount = in.nextInt();
+                }
+                else {
+                    System.out.println("Please enter a number between 1 and 10.");
+                }
+                in.nextLine();
+            }
             // create hands and draw cards for them
             List<Hand> playerHands = new ArrayList<Hand>();
-            playerHands.add(new Hand());
-            Hand dealerHand = new Hand();
+            for(int i = 1; i <= playerCount; i++) {
+                playerHands.add(new Hand("Player " + i));
+            }
+            Hand dealerHand = new Hand("Dealer");
             for (int i = 0; i < 2; i++) {
                 dealerHand.insertCard(deck.drawCard());
             }
@@ -42,55 +55,27 @@ public class App {
                 }
             }
 
-            // print hands (only show the first card of the dealer)
+            // only show the first card of the dealer
             System.out.println("Revealed dealer card:");
             System.out.println(dealerHand.getCardAtIndex(0).getDisplayText() + "\n");
 
-            boolean exitApp = false;
-            boolean revealDealer = false;
-
-            // check if the player has blackjack
-            for (int i = 0; i < playerHands.size(); i++) {
-                Hand playerHand = playerHands.get(i);
-                int handValue = playerHand.getHandValue();
-                if (handValue == 21) {
-                    System.out.println("Your cards:");
-                    printHand(playerHand);
-
-                    System.out.println("Blackjack! You Win!");
-                    logger.info("Player won");
-                    exitApp = true;
-                } else if (playerHand.getCardAtIndex(0).getRank() == playerHand.getCardAtIndex(1).getRank()) {
-                    // player can split
-                    System.out.println("Your cards:");
-                    printHand(playerHand);
-
-                    System.out.println(
-                            "You have the opportunity to split your hand! Type 1 to split. Type anything else to ignore.");
-                    if (in.hasNextInt() && in.nextInt() == 1) {
-                        logger.info("Player split");
-                        Hand newHand = new Hand();
-                        playerHands.add(newHand);
-                        newHand.insertCard(playerHand.getCardAtIndex(1));
-                        playerHand.removeCard(1);
-                        newHand.insertCard(deck.drawCard());
-                        playerHand.insertCard(deck.drawCard());
-                    }
-                    in.nextLine();
-                }
-            }
-            if (!exitApp && dealerHand.getHandValue() == 21) {
-                System.out.println("The dealer has a blackjack! You lose!");
-                logger.info("Player lost");
-                exitApp = true;
+            if (dealerHand.getHandValue() == 21) {
+                dealerHand.blackjack = true;
+                System.out.println("The dealer has a blackjack!");
             }
 
             // game loop
-            while (!(exitApp || revealDealer)) {
-                for (Hand playerHand : playerHands) {
-                    System.out.println("Your cards:");
-                    printHand(playerHand);
+            for(int i = 0; i < playerHands.size(); i++) {
+                // check if the player has blackjack or can split
+                evaluateSpecialHands(playerHands, i, deck, in);
+                if (dealerHand.blackjack) {
+                    // dealer has blackjack
+                    continue;
+                }
 
+                Hand playerHand = playerHands.get(i);
+                printHand(playerHand);
+                while(!(playerHand.busted || playerHand.blackjack || playerHand.standing)) {
                     System.out.println("Type 1 to hit and 2 to stand.");
                     int choice = -1;
                     if (in.hasNextInt()) {
@@ -99,24 +84,22 @@ public class App {
                     in.nextLine();
                     switch (choice) {
                         case 1: // hit
-                            logger.fine("Player hit");
+                            logger.fine(playerHand.getIdentity() + " hit");
                             playerHand.insertCard(deck.drawCard());
-                            System.out.println("Your cards:");
                             printHand(playerHand);
                             int handValue = playerHand.getHandValue();
                             if (handValue > 21) {
-                                logger.info("Player lost");
+                                logger.info(playerHand.getIdentity() + " lost");
                                 System.out.println("You busted!");
-                                exitApp = true;
+                                playerHand.busted = true;
                             } else if (handValue == 21) {
                                 System.out.println("You got 21!");
-                                revealDealer = true;
+                                playerHand.standing = true;
                             }
                             break;
                         case 2: // stand
-                            logger.fine("Player stood");
-                            revealDealer = true;
-                            System.out.println("");
+                            logger.fine(playerHand.getIdentity() + " stood\n");
+                            playerHand.standing = true;
                             break;
                         default:
                             System.out.println("Invalid choice.");
@@ -124,41 +107,28 @@ public class App {
                     }
                 }
             }
-            if (revealDealer) {
-                System.out.println("Dealer cards:");
+
+            /* Dealer's turn */
+            printHand(dealerHand);
+            Thread.sleep(1000);
+            while (dealerHand.getHandValue() < 17) // stand on 17 or more
+            {
+                System.out.println("The dealer draws a card. \n");
+                Thread.sleep(1000);
+                dealerHand.insertCard(deck.drawCard());
                 printHand(dealerHand);
                 Thread.sleep(1000);
-                while (dealerHand.getHandValue() < 17) // stand on 17 or more
-                {
-                    System.out.println("The dealer draws a card. \n");
-                    Thread.sleep(1000);
-                    dealerHand.insertCard(deck.drawCard());
-                    System.out.println("Dealer cards:");
-                    printHand(dealerHand);
-                    Thread.sleep(1000);
-                }
-                int handValue = dealerHand.getHandValue();
-                if (handValue > 21) {
-                    System.out.println("The dealer busted! You win!");
-                    logger.info("Player won");
-                } else if (handValue == 21 && dealerHand.getHandSize() == 2) {
-                    System.out.println("The dealer has a blackjack! You lose!");
-                    logger.info("Player lost");
-                } else {
-                    for (Hand playerHand : playerHands) {
-                        if (handValue > playerHand.getHandValue()) {
-                            System.out.println("The dealer stands.\nYou lose!");
-                            logger.info("Player lost");
-                        } else if (handValue < playerHand.getHandValue()) {
-                            System.out.println("The dealer stands.\nYou win!");
-                            logger.info("Player won");
-                        } else if (handValue == playerHand.getHandValue()) {
-                            System.out.println("The dealer stands.\nIt's a tie!");
-                            logger.info("Player tied");
-                        }
-                    }
-                }
             }
+            int handValue = dealerHand.getHandValue();
+            if (handValue > 21) {
+                dealerHand.busted = true;
+                System.out.println("The dealer busted!");
+            }
+            else {
+                System.out.println("The dealer stands.");
+            }
+            printGameResults(dealerHand, playerHands);
+
             System.out.println("\nType 0 to quit. Type anything else to continue.");
             keepPlaying = !(in.hasNextInt() && in.nextInt() == 0);
             in.nextLine();
@@ -169,10 +139,78 @@ public class App {
     }
 
     private static void printHand(Hand hand) {
+        System.out.println("");
+        System.out.println(hand.getIdentity() + ":");
         for (int i = 0; i < hand.getHandSize(); i++) {
             System.out.println(hand.getCardAtIndex(i).getDisplayText());
         }
         System.out.println(hand.getHandValue());
         System.out.println("");
+    }
+
+    private static void evaluateSpecialHands(List<Hand> playerHands, int index, Deck deck, Scanner in) 
+    {
+        Hand playerHand = playerHands.get(index);
+        int handValue = playerHand.getHandValue();
+        if (handValue == 21) {
+            playerHand.blackjack = true;
+            printHand(playerHand);
+
+            System.out.println(playerHand.getIdentity() + " has blackjack!");
+        } else if (playerHand.getCardAtIndex(0).getValue() == playerHand.getCardAtIndex(1).getValue()) {
+            // player can split
+            printHand(playerHand);
+
+            System.out.println(
+                    "You have the opportunity to split your hand! Type 1 to split. Type anything else to ignore.");
+            if (in.hasNextInt() && in.nextInt() == 1) {
+                logger.info("Player split");
+                Hand newHand = new Hand(playerHand.getIdentity() + " split hand");
+                playerHands.add(index + 1, newHand);
+                newHand.insertCard(playerHand.getCardAtIndex(1));
+                playerHand.removeCard(1);
+                newHand.insertCard(deck.drawCard());
+                playerHand.insertCard(deck.drawCard());
+            }
+            in.nextLine();
+        }
+    }
+
+    private static void printGameResults(Hand dealerHand, List<Hand> playerHands) {
+        int handValue = dealerHand.getHandValue();
+        if (handValue > 21) {
+            dealerHand.busted = true;
+        }
+        for(Hand playerHand : playerHands) {
+            System.out.println(playerHand.getIdentity() + ":");
+            if(playerHand.busted) {
+                System.out.println("You busted! You lose!");
+                logger.info(playerHand.getIdentity() + " lost");
+            }
+            else if(playerHand.blackjack) {
+                System.out.println("You have a blackjack! You win!");
+                logger.info(playerHand.getIdentity() + " won");
+            }
+            else if(dealerHand.busted) {
+                System.out.println("The dealer busted! You win!");
+                logger.info(playerHand.getIdentity() + " won");
+            }
+            else if(dealerHand.blackjack) {
+                System.out.println("The dealer has a blackjack! You lose!");
+                logger.info(playerHand.getIdentity() + " lost");
+            }
+            else {
+                if (handValue > playerHand.getHandValue()) {
+                    System.out.println("Your hand is lower than the dealer's. You lose!");
+                    logger.info(playerHand.getIdentity() + " lost");
+                } else if (handValue < playerHand.getHandValue()) {
+                    System.out.println("Your hand is higher than the dealer's. You win!");
+                    logger.info(playerHand.getIdentity() + " won");
+                } else if (handValue == playerHand.getHandValue()) {
+                    System.out.println("Your hand is as high as the dealer's. You tied!");
+                    logger.info(playerHand.getIdentity() + " tied");
+                }
+            }
+        }
     }
 }
