@@ -164,7 +164,7 @@ public class App {
             System.out.println(
                     "You have the opportunity to split your hand! Type 1 to split. Type anything else to ignore.");
             if (in.hasNextInt() && in.nextInt() == 1) {
-                logger.info("Player split");
+                logger.info(playerHand.getIdentity() + " split");
                 Hand newHand = new Hand(playerHand.getIdentity() + " split hand");
                 playerHands.add(index + 1, newHand);
                 newHand.insertCard(playerHand.getCardAtIndex(1));
