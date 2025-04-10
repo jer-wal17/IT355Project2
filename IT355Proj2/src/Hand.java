@@ -23,11 +23,10 @@ public class Hand {
     }
 
     public Card getCardAtIndex(int index) {
-        if(index < cards.size()) {
+        if(index >= 0 && index < cards.size()) {
             return cards.get(index);
-        }
-        else {
-            return null;
+        } else {
+            return new Card().setRank(Card.Rank.Ace).setSuit(Card.Suit.Hearts);
         }
     }
 
@@ -64,6 +63,7 @@ public class Hand {
                 }
             }
         }
+        /*
         int result = -1;
         // sort possible values (ascending)
         Collections.sort(possibleValues);
@@ -77,6 +77,17 @@ public class Hand {
             else if(currentValue < 22) {
                 // we did not bust
                 result = currentValue;
+            }
+        }
+        return result;
+        */
+        // changed this because I saw it was possibly going to give a always false but if it doesn't work than change it back and it's not a problem
+        int result = possibleValues.get(possibleValues.size()-1); // Start with highest
+        for(int i = possibleValues.size()-1; i >= 0; i--) {
+            int currentValue = possibleValues.get(i);
+            if(currentValue <= 21) {
+                result = currentValue;
+                break;
             }
         }
         return result;

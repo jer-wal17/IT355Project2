@@ -1,7 +1,6 @@
 import java.util.Random;
 import java.util.Stack;
 import java.util.Collections;
-import java.util.EmptyStackException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -62,15 +61,10 @@ public class Deck {
     }
 
     public Card drawCard() {
-        try {
+        if(!cards.isEmpty()) {
             return cards.pop();
-        } catch (EmptyStackException e) {
-            // This should never happen. If it does, something is seriously wrong so we kill
-            // everything.
-            e.printStackTrace();
-            System.err.println("Tried to pop off card stack with nothing there");
-            System.exit(1);
-            return null;
+        } else {
+            throw new java.util.EmptyStackException();  
         }
     }
 

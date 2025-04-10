@@ -12,130 +12,177 @@ public class App {
         FileHandler fh = null;
         try {
             fh = new FileHandler("BlackjackLog.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        fh.setFormatter(new SimpleFormatter());
-        LogManager.getLogManager().reset();
-        logger.addHandler(fh);
-        logger.setLevel(Level.FINE);
+            fh.setFormatter(new SimpleFormatter());
+            LogManager.getLogManager().reset();
+            logger.addHandler(fh);
+            logger.setLevel(Level.FINE);
 
-        Scanner in = new Scanner(System.in);
-        boolean keepPlaying = true;
-        while (keepPlaying) {
-            System.out.println("Welcome to Blackjack!\nThe dealer stands on 17.\n");
+            Scanner in = new Scanner(System.in);
+            boolean keepPlaying = true;
+            while (keepPlaying) {
+                System.out.println("Welcome to Blackjack!\nThe dealer stands on 17.\n");
 
-            // create and shuffle deck
-            Deck deck = DeckBuilder.createStandardDeck();
-            deck.shuffle();
+                // create and shuffle deck
+                Deck deck = DeckBuilder.createStandardDeck();
+                deck.shuffle();
 
-            int playerCount = 0;
-            while(playerCount < 1 || playerCount > 10) {
-                System.out.println("Enter the number of players (1-10):");
-                if (in.hasNextInt()) {
-                    playerCount = in.nextInt();
-                }
-                else {
-                    System.out.println("Please enter a number between 1 and 10.");
-                }
-                in.nextLine();
-            }
-            // create hands and draw cards for them
-            List<Hand> playerHands = new ArrayList<Hand>();
-            for(int i = 1; i <= playerCount; i++) {
-                playerHands.add(new Hand("Player " + i));
-            }
-            Hand dealerHand = new Hand("Dealer");
-            for (int i = 0; i < 2; i++) {
-                dealerHand.insertCard(deck.drawCard());
-            }
-            for (Hand playerHand : playerHands) {
-                for (int i = 0; i < 2; i++) {
-                    playerHand.insertCard(deck.drawCard());
-                }
-            }
-
-            // only show the first card of the dealer
-            System.out.println("Revealed dealer card:");
-            System.out.println(dealerHand.getCardAtIndex(0).getDisplayText() + "\n");
-
-            if (dealerHand.getHandValue() == 21) {
-                dealerHand.blackjack = true;
-                System.out.println("The dealer has a blackjack!");
-            }
-
-            // game loop
-            for(int i = 0; i < playerHands.size(); i++) {
-                // check if the player has blackjack or can split
-                evaluateSpecialHands(playerHands, i, deck, in);
-                if (dealerHand.blackjack) {
-                    // dealer has blackjack
-                    continue;
-                }
-
-                Hand playerHand = playerHands.get(i);
-                printHand(playerHand);
-                while(!(playerHand.busted || playerHand.blackjack || playerHand.standing)) {
-                    System.out.println("Type 1 to hit and 2 to stand.");
-                    int choice = -1;
+                int playerCount = 0;
+                while (playerCount < 1 || playerCount > 10) {
+                    System.out.println("Enter the number of players (1-10):");
                     if (in.hasNextInt()) {
-                        choice = in.nextInt();
+                        playerCount = in.nextInt();
+                    } else {
+                        System.out.println("Please enter a number between 1 and 10.");
                     }
                     in.nextLine();
-                    switch (choice) {
-                        case 1: // hit
-                            logger.fine(playerHand.getIdentity() + " hit");
+                }
+                // create hands and draw cards for them
+                List<Hand> playerHands = new ArrayList<Hand>();
+                for (int i = 1; i <= playerCount; i++) {
+                    playerHands.add(new Hand("Player " + i));
+                }
+                Hand dealerHand = new Hand("Dealer");
+                try {
+                    for (int i = 0; i < 2; i++) {
+                        dealerHand.insertCard(deck.drawCard());
+                    }
+                } catch (java.util.EmptyStackException e) {
+                    handleEmptyDeck(deck);
+                    dealerHand.insertCard(deck.drawCard());
+                }
+                for (Hand playerHand : playerHands) {
+                    for (int i = 0; i < 2; i++) {
+                        try {
                             playerHand.insertCard(deck.drawCard());
-                            printHand(playerHand);
-                            int handValue = playerHand.getHandValue();
-                            if (handValue > 21) {
-                                logger.info(playerHand.getIdentity() + " lost");
-                                System.out.println("You busted!");
-                                playerHand.busted = true;
-                            } else if (handValue == 21) {
-                                System.out.println("You got 21!");
-                                playerHand.standing = true;
-                            }
-                            break;
-                        case 2: // stand
-                            logger.fine(playerHand.getIdentity() + " stood\n");
-                            playerHand.standing = true;
-                            break;
-                        default:
-                            System.out.println("Invalid choice.");
-                            break;
+                        } catch (java.util.EmptyStackException e) {
+                            handleEmptyDeck(deck);
+                            playerHand.insertCard(deck.drawCard());
+                        }
                     }
                 }
-            }
 
-            /* Dealer's turn */
-            printHand(dealerHand);
-            Thread.sleep(1000);
-            while (dealerHand.getHandValue() < 17) // stand on 17 or more
-            {
-                System.out.println("The dealer draws a card. \n");
-                Thread.sleep(1000);
-                dealerHand.insertCard(deck.drawCard());
+                // only show the first card of the dealer
+                System.out.println("Revealed dealer card:");
+                System.out.println(dealerHand.getCardAtIndex(0).getDisplayText() + "\n");
+
+                if (dealerHand.getHandValue() == 21) {
+                    dealerHand.blackjack = true;
+                    System.out.println("The dealer has a blackjack!");
+                }
+
+                // game loop
+                for (int i = 0; i < playerHands.size(); i++) {
+                    // check if the player has blackjack or can split
+                    evaluateSpecialHands(playerHands, i, deck, in);
+                    if (dealerHand.blackjack) {
+                        // dealer has blackjack
+                        continue;
+                    }
+
+                    Hand playerHand = playerHands.get(i);
+                    printHand(playerHand);
+                    while (!(playerHand.busted || playerHand.blackjack || playerHand.standing)) {
+                        System.out.println("Type 1 to hit and 2 to stand.");
+                        int choice = -1;
+                        if (in.hasNextInt()) {
+                            choice = in.nextInt();
+                            if(choice < 1 || choice > 2) {
+                                choice = -1;
+                                System.out.println("Invalid choice. Valid options are 1 or 2");
+                            }
+                        }
+                        in.nextLine();
+                        switch (choice) {
+                            case 1: // hit
+                                logger.fine(playerHand.getIdentity() + " hit");
+                                try {
+                                    playerHand.insertCard(deck.drawCard());
+                                } catch (java.util.EmptyStackException e) {
+                                    handleEmptyDeck(deck);
+                                    playerHand.insertCard(deck.drawCard());
+                                }
+                                printHand(playerHand);
+                                int handValue = playerHand.getHandValue();
+                                if (handValue > 21) {
+                                    logger.info(playerHand.getIdentity() + " lost");
+                                    System.out.println("You busted!");
+                                    playerHand.busted = true;
+                                } else if (handValue == 21) {
+                                    System.out.println("You got 21!");
+                                    playerHand.standing = true;
+                                }
+                                break;
+                            case 2: // stand
+                                logger.fine(playerHand.getIdentity() + " stood\n");
+                                playerHand.standing = true;
+                                break;
+                            default:
+                                System.out.println("Invalid choice.");
+                                break;
+                        }
+                    }
+                }
+
+                /* Dealer's turn */
                 printHand(dealerHand);
-                Thread.sleep(1000);
-            }
-            int handValue = dealerHand.getHandValue();
-            if (handValue > 21) {
-                dealerHand.busted = true;
-                System.out.println("The dealer busted!");
-            }
-            else {
-                System.out.println("The dealer stands.");
-            }
-            printGameResults(dealerHand, playerHands);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                while (dealerHand.getHandValue() < 17) // stand on 17 or more
+                {
+                    System.out.println("The dealer draws a card. \n");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    try {
+                        dealerHand.insertCard(deck.drawCard());
+                    } catch (java.util.EmptyStackException e) {
+                        handleEmptyDeck(deck);
+                        dealerHand.insertCard(deck.drawCard());
+                    }
+                    printHand(dealerHand);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                int handValue = dealerHand.getHandValue();
+                if (handValue > 21) {
+                    dealerHand.busted = true;
+                    System.out.println("The dealer busted!");
+                } else {
+                    System.out.println("The dealer stands.");
+                }
+                printGameResults(dealerHand, playerHands);
 
-            System.out.println("\nType 0 to quit. Type anything else to continue.");
-            keepPlaying = !(in.hasNextInt() && in.nextInt() == 0);
-            in.nextLine();
-            System.out.println("");
+                System.out.println("\nType 0 to quit. Type anything else to continue.");
+                keepPlaying = !(in.hasNextInt() && in.nextInt() == 0);
+                in.nextLine();
+                System.out.println("");
+            }
+            in.close();
+        } catch (IOException e) {
+            System.err.println("Failed to initialize logging: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Critical error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (fh != null) {
+                fh.close();
+            }
         }
-        in.close();
-        fh.close();
+    }
+
+    // helper method for deck recovery
+    private static void handleEmptyDeck(Deck deck) {
+        System.out.println("Reshuffling empty deck...");
+        deck = DeckBuilder.createStandardDeck();
+        deck.shuffle();
     }
 
     private static void printHand(Hand hand) {
