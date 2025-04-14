@@ -1,16 +1,18 @@
-import java.util.Random;
 import java.util.Stack;
 import java.util.Collections;
 import java.util.List;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 public class Deck {
     private Stack<Card> cards;
-    private Random random; // make a more complex pseudorandom number if that's one of the rules
+    private SecureRandom random; // use secure random instead of reg random for seeding
 
     public Deck() {
         cards = new Stack<Card>();
-        random = new Random();
+        random = new SecureRandom();
+        //seed it
+        random.nextBytes(new byte[16]);
     }
 
     public void shuffle() {

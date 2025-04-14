@@ -1,4 +1,4 @@
-public class Card {
+public class Card implements Cloneable {
     private Rank rank;
     private Suit suit;
 
@@ -49,6 +49,11 @@ public class Card {
             default:
                 return 0;
         }
+    }
+
+    public Card clone() throws CloneNotSupportedException {
+        Card clonedCard = (Card)super.clone();
+        return clonedCard;
     }
 
     public enum Suit {

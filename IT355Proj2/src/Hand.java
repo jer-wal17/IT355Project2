@@ -21,10 +21,18 @@ public class Hand {
     public int getHandSize() {
         return cards.size();
     }
-
+    //replaced this with a clone method for rule
     public Card getCardAtIndex(int index) {
         if(index >= 0 && index < cards.size()) {
-            return cards.get(index);
+            Card returnCard = cards.get(index);
+            try{
+                return returnCard.clone(); 
+            }
+            catch (CloneNotSupportedException e){
+                //base case if for some reason doesn't clone properly
+                return cards.get(index);
+            }
+            //return cards.get(index);
         } else {
             return new Card().setRank(Card.Rank.Ace).setSuit(Card.Suit.Hearts);
         }
