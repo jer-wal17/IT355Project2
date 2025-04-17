@@ -15,25 +15,36 @@ public class Deck {
         random.nextBytes(new byte[16]);
     }
 
+    /**
+    * Shuffles the deck of cards using a combination of Fisher-Yates and riffle shuffles.
+    * If there are fewer than 2 cards in the deck, the method returns immediately as no shuffling is needed.
+    * The shuffling process consists of:
+    * - 5 iterations of Fisher-Yates shuffle
+    * - 5 iterations of riffle shuffle
+    * The original card collection is cleared and replaced with the shuffled cards.
+    */
     public void shuffle() {
         if (cards.size() < 2)
             return;
-
         List<Card> cardList = new ArrayList<>(cards);
-
         for (int i = 0; i < 5; i++) {
             fisherYatesShuffle(cardList);
         }
-
         for (int i = 0; i < 5; i++) {
             riffleShuffle(cardList);
         }
-
         cards.clear();
         cards.addAll(cardList);
     }
 
-    // Standard Fisher-Yates shuffle
+    /**
+    * Performs a Fisher-Yates shuffle (also known as the Knuth shuffle) on the given list of cards.
+    * This algorithm produces an unbiased permutation of the list, meaning all permutations are equally likely.
+    * The shuffle is performed in-place by iterating through the list from last to first element,
+    * swapping each element with another randomly chosen element from the remaining unshuffled portion.
+    *
+    * @param list The list of cards to be shuffled (will be modified in-place)
+    */
     private void fisherYatesShuffle(List<Card> list) {
         for (int i = list.size() - 1; i > 0; i--) {
             int j = random.nextInt(i + 1);
@@ -41,19 +52,20 @@ public class Deck {
         }
     }
 
-    // Simplified riffle shuffle
+    /**
+    * Performs a riffle shuffle (also known as a dovetail shuffle) on the given list of cards.
+    * The deck is split at a randomly determined point near the middle (with some variation),
+    * then the two halves are interleaved in a random fashion to simulate a real-world riffle shuffle.
+    * This method modifies the input list in-place.
+    *
+    * @param list The list of cards to be shuffled (will be modified in-place)
+    */
     private void riffleShuffle(List<Card> list) {
-        // Split the deck roughly in half (with slight randomness)
         int splitPoint = list.size() / 2 + random.nextInt(5) - 2;
-
         List<Card> left = new ArrayList<>(list.subList(0, splitPoint));
         List<Card> right = new ArrayList<>(list.subList(splitPoint, list.size()));
-
         list.clear();
-
-        // Interleave the cards with some randomness
         while (!left.isEmpty() || !right.isEmpty()) {
-            // Prefer the pile with more cards remaining
             if (!left.isEmpty() && (right.isEmpty() || left.size() > right.size() || random.nextBoolean())) {
                 list.add(left.remove(0));
             } else {

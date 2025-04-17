@@ -178,7 +178,16 @@ public class App {
         }
     }
 
-    // helper method for deck recovery
+    /**
+    * Helper method for deck recovery that handles the case when a deck becomes empty.
+    * When invoked, this method will:
+    * - Print a notification message indicating the deck is being reshuffled
+    * - Creates a new standard 52-card deck using {@link DeckBuilder#createStandardDeck()}
+    * - Shuffles the newly created deck using {@link Deck#shuffle()}
+    *
+    * @param deck The empty deck that needs to be replenished (will be replaced with a new deck)
+    * @return A new, shuffled standard deck to replace the empty one
+    */
     private static void handleEmptyDeck(Deck deck) {
         System.out.println("Reshuffling empty deck...");
         deck = DeckBuilder.createStandardDeck();
