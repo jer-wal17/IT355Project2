@@ -8,6 +8,9 @@ public class Deck {
     private Stack<Card> cards;
     private SecureRandom random; // use secure random instead of reg random for seeding
 
+    /**
+     * Create a new empty Deck
+     */
     public Deck() {
         cards = new Stack<Card>();
         random = new SecureRandom();
@@ -74,6 +77,10 @@ public class Deck {
         }
     }
 
+    /**
+     * Pop a card off this deck
+     * @return The drawn Card object
+     */
     public Card drawCard() {
         if(!cards.isEmpty()) {
             return cards.pop();
@@ -82,6 +89,10 @@ public class Deck {
         }
     }
 
+    /**
+     * Push a card onto this deck
+     * @param newCard The card object to add
+     */
     public void insertCard(Card newCard) {
         cards.push(newCard);
     }

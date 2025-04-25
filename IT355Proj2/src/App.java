@@ -194,6 +194,10 @@ public class App {
         deck.shuffle();
     }
 
+    /**
+     * Helper method to print the contents of a hand to the terminal window.
+     * @param hand The hand to be printed
+     */
     private static void printHand(Hand hand) {
         System.out.println("");
         System.out.println(hand.getIdentity() + ":");
@@ -204,6 +208,14 @@ public class App {
         System.out.println("");
     }
 
+    /**
+     * Helper method to check for a blackjack or a split potential.
+     * Only use immediately after the hand is dealt (when it contains 2 cards).
+     * @param playerHands The hands of all players
+     * @param index The player hand index being evaluated
+     * @param deck The deck being used for the current game
+     * @param in The Scanner input object
+     */
     private static void evaluateSpecialHands(List<Hand> playerHands, int index, Deck deck, Scanner in) 
     {
         Hand playerHand = playerHands.get(index);
@@ -232,6 +244,11 @@ public class App {
         }
     }
 
+    /**
+     * Helper method to print results of the current game
+     * @param dealerHand The hand of the dealer
+     * @param playerHands The hands of all player
+     */
     private static void printGameResults(Hand dealerHand, List<Hand> playerHands) {
         int handValue = dealerHand.getHandValue();
         if (handValue > 21) {

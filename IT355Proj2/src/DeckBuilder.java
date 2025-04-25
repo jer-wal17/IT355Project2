@@ -1,4 +1,8 @@
 public class DeckBuilder {
+    /**
+     * Build a fresh standard 52-card deck
+     * @return The new Deck object
+     */
     public static Deck createStandardDeck() {
         Deck newDeck = new Deck();
         Card.Rank[] ranks = Card.Rank.values();

@@ -9,19 +9,37 @@ public class Hand {
     public boolean blackjack = false;
     public boolean standing = false;
 
+    /**
+     * Create a new hand
+     * @param identity The name of this new hand (ex. "Dealer", "Player 1")
+     */
     public Hand(String identity) {
         cards = new ArrayList<Card>();
         this.identity = identity;
     }
 
+    /**
+     * Get the identity of this hand
+     * @return The string representing the hand owner
+     */
     public String getIdentity() {
         return identity;
     }
 
+    /**
+     * Get the size (quantity) of this hand
+     * @return The size of this hand
+     */
     public int getHandSize() {
         return cards.size();
     }
-    //replaced this with a clone method for rule
+
+    /**
+     * Clones the card found at the input index
+     * Prerequisite: The index is not out of bounds!
+     * @param index The requested index to be cloned
+     * @return A clone of the card
+     */
     public Card getCardAtIndex(int index) {
         if(index >= 0 && index < cards.size()) {
             Card returnCard = cards.get(index);
@@ -32,22 +50,34 @@ public class Hand {
                 //base case if for some reason doesn't clone properly
                 return cards.get(index);
             }
-            //return cards.get(index);
-        } else {
+        } else { // index is out of bounds!
             return new Card().setRank(Card.Rank.Ace).setSuit(Card.Suit.Hearts);
         }
     }
 
+    /**
+     * Add a card into this hand
+     * @param newCard The card object to add
+     */
     public void insertCard(Card newCard) {
         cards.add(newCard);
     }
 
+    /**
+     * Remove a card from this hand at the specified index
+     * Prerequisite: The index is not out of bounds!
+     * @param index The requested index to be removed
+     */
     public void removeCard(int index) {
         if(index < getHandSize()) {
             cards.remove(index);
         }
     }
     
+    /**
+     * Get the value of this hand
+     * @return The highest possible value of the hand if it is not busted, otherwise the lowest possible value
+     */
     public int getHandValue() {
         List<Integer> possibleValues = new ArrayList<Integer>();
         possibleValues.add(0);
@@ -71,30 +101,13 @@ public class Hand {
                 }
             }
         }
-        /*
-        int result = -1;
         // sort possible values (ascending)
         Collections.sort(possibleValues);
-        for(int i = 0; i < possibleValues.size(); i++) {
-            int currentValue = possibleValues.get(i);
-            if(currentValue > 21 && result == -1) {
-                // we busted, return
-                result = currentValue;
-                break;
-            }
-            else if(currentValue < 22) {
+        int result = possibleValues.get(possibleValues.size() - 1); // Start with highest
+        for(int i = possibleValues.size() - 2; i >= 0; i--) {
+            result = possibleValues.get(i);
+            if(result <= 21) {
                 // we did not bust
-                result = currentValue;
-            }
-        }
-        return result;
-        */
-        // changed this because I saw it was possibly going to give a always false but if it doesn't work than change it back and it's not a problem
-        int result = possibleValues.get(possibleValues.size()-1); // Start with highest
-        for(int i = possibleValues.size()-1; i >= 0; i--) {
-            int currentValue = possibleValues.get(i);
-            if(currentValue <= 21) {
-                result = currentValue;
                 break;
             }
         }
