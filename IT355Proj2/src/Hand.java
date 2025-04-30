@@ -104,7 +104,7 @@ public class Hand {
         // sort possible values (ascending)
         Collections.sort(possibleValues);
         int result = possibleValues.get(possibleValues.size() - 1); // Start with highest
-        for(int i = possibleValues.size() - 2; i >= 0; i--) {
+        for(int i = possibleValues.size() - 1; i >= 0; i--) {
             result = possibleValues.get(i);
             if(result <= 21) {
                 // we did not bust
